@@ -11,7 +11,7 @@ JXPAD
 K-s
 
 %url
-https://
+https://github.com/skymonsters-Ks/JXPAD
 
 %note
 jxpad.as をインストールしてください
