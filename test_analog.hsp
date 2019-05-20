@@ -1,0 +1,49 @@
+#include "jxpad.as" /* アナログスティック・トリガーのテスト */
+
+	initPad 1
+	enableAnalog
+	
+*mainLoop
+
+	updatePad
+	lsx = padAnalog(PAD_LSTICK_X)
+	lsy = padAnalog(PAD_LSTICK_Y)
+	rsx = padAnalog(PAD_RSTICK_X)
+	rsy = padAnalog(PAD_RSTICK_Y)
+	ltr = padAnalog(PAD_LTRIGGER)
+	rtr = padAnalog(PAD_RTRIGGER)
+
+	redraw 0
+	color : boxf : color 255, 255, 255
+	
+	s = 50
+	py = 100
+	triggerbox 60, py, 10, s, ltr
+	stickbox 140, py, s, 10, lsx, lsy
+	stickbox 280, py, s, 10, rsx, rsy
+	triggerbox 360, py, 10, s, rtr
+	
+	redraw 1
+	await 15
+		
+	goto *mainLoop
+
+#deffunc stickbox int _x, int _y, int _sz, int _cs, double _stx, double _sty
+	box _x, _y, _sz, _sz
+	x = _x + _stx * _sz
+	y = _y + _sty * _sz
+	circle x - _cs, y - _cs, x + _cs, y + _cs
+	return
+
+#deffunc triggerbox int _x, int _y, int _sx, int _sy, double _trg
+	box _x, _y, _sx, _sy
+	y = (1.0 - _trg) * _sy * 2
+	boxf _x - _sx, _y + _sy - y, _x + _sx, _y + _sy
+	return
+
+#deffunc box int _x, int _y, int _sx, int _sy
+	line _x + _sx, _y - _sy, _x - _sx, _y - _sy
+	line _x + _sx, _y + _sy
+	line _x - _sx, _y + _sy
+	line _x - _sx, _y - _sy
+	return

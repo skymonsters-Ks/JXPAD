@@ -1,0 +1,86 @@
+#include "jxpad.as" /* アナログ→デジタル変換の閾値テスト */
+
+	initPad 1
+	num = stat - 1
+	
+*mainLoop
+
+	updatePad
+	dstat = stat
+
+	ddim axis, 2
+	ddim trig, 2
+	repeat num
+		getAxisAll ax, cnt + 1
+		getTrigAll tr, cnt + 1
+		repeat 4 : axis(cnt) = limitf(axis(cnt) + ax(cnt), -1, 1) : loop
+		repeat 2 : trig(cnt) = limitf(trig(cnt) + tr(cnt), 0, 1) : loop
+	loop
+	lsx = axis(0)
+	lsy = axis(1)
+	ltr = trig(0)
+	rtr = trig(1)
+	
+	repeat num
+		i = cnt + 1
+		setAxisBorder i, getAxisBorder(i) + 0.1 * (padDown(PAD_BUTTON_1) - padDown(PAD_BUTTON_2))
+		setTrigBorder i, getTrigBorder(i) + 0.1 * (padDown(PAD_BUTTON_3) - padDown(PAD_BUTTON_4))
+	loop
+	ab = getAxisBorder(num)
+	tb = getTrigBorder(num)
+
+	redraw 0
+	color : boxf : color 255, 255, 255
+	
+	s = 50
+	py = 100
+	triggerbox 60, py, 10, s, ltr, dstat & $400, tb
+	stickbox 140, py, s, 10, lsx, lsy, dstat & $f, ab
+	triggerbox 220, py, 10, s, rtr, dstat & $800, tb
+	
+	color 255, 255, 255
+	pos 10, 180
+	mes strf("Axis: %.1f\nTrig: %.1f", ab, tb)
+	
+	redraw 1
+	await 15
+	
+	goto *mainLoop
+
+#deffunc stickbox int _x, int _y, int _sz, int _cs, double _stx, double _sty, int _stat, double _ab
+	color 120, 120, 120
+	r = 1.2 * _sz
+	repeat 8
+		a = M_PI / 8 + M_PI / 4 * cnt
+		line cos(a) * r + _x, sin(a) * r + _y, _x, _y
+	loop
+	r = _ab * _sz
+	circle _x - r, _y - r, _x + r, _y + r, 0
+	box _x, _y, _sz, _sz, _stat
+	x = _x + _stx * _sz
+	y = _y + _sty * _sz
+	color 255, 255, 255
+	line x - _cs, y, x + _cs, y
+	line x, y - _cs, x, y + _cs
+	return
+
+#deffunc triggerbox int _x, int _y, int _sx, int _sy, double _trg, int _stat, double _tb
+	color 120, 120, 120
+	w = _sx + 10
+	y = _tb * 2 * _sy - _sy + _y
+	line _x - w, y, _x + w, y
+	box _x, _y, _sx, _sy, (_stat > 0) * $f
+	y = (1.0 - _trg) * _sy * 2
+	boxf _x - _sx, _y + _sy - y, _x + _sx, _y + _sy
+	return
+
+#deffunc box int _x, int _y, int _sx, int _sy, int _stat
+	lcolor 2 & _stat : line _x + _sx, _y - _sy, _x - _sx, _y - _sy
+	lcolor 4 & _stat : line _x + _sx, _y + _sy
+	lcolor 8 & _stat : line _x - _sx, _y + _sy
+	lcolor 1 & _stat : line _x - _sx, _y - _sy
+	return
+
+#deffunc lcolor int _f
+	color 255, (_f == 0) * 255, 255
+	return

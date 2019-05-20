@@ -1,0 +1,82 @@
+#include "jxpad.as" /* 入力情報表示テスト */
+
+	mode = 0
+	oncmd gosub *cmd, $111/*WM_COMMAND*/
+	objsize 100
+	pos 10, 10
+	combox m, , "Joy+Digital\nJoy+Analog\nXInput+Digital\nXInput+Analog"
+	obj = objinfo_hwnd(stat)
+	gosub *change
+	
+*mainLoop
+
+	updatePad 0
+	
+	redraw 0
+	color : boxf : color 255, 255, 255
+	
+	pos 10, 40
+	mes "ID"
+	mes "Stat"
+	mes "Axis"
+	repeat num
+		pos 70 + cnt * 70, 40
+		mes cnt
+		mes strf("0x%x", getInputButton(cnt,1))
+		getAxisAll ax, cnt
+		repeat stat
+			mes strf("%6.3f", ax(cnt))
+		loop
+	loop
+	
+	pos 10, 200
+	mes "Left"
+	mes "Up"
+	mes "Right"
+	mes "Down"
+	pos 60, 200
+	repeat 4
+		mes strf("%d, %d, %d, %d", padPress(cnt), padChanged(cnt), padDown(cnt), padUp(cnt))
+	loop
+	
+	pos 180, 200
+	repeat 12, 1
+		mes "Button_" + cnt
+	loop
+	pos 270, 200
+	repeat 12, 4
+		mes strf("%d, %d, %d, %d", padPress(cnt), padChanged(cnt), padDown(cnt), padUp(cnt))
+	loop
+	
+	pos 390, 200
+	mes "LStick_X"
+	mes "LStick_Y"
+	mes "RStick_X"
+	mes "RStick_Y"
+	mes "LTrigger"
+	mes "RTrigger"
+	pos 470, 200
+	repeat 6
+		mes strf("%6.3f", padAnalog(cnt))
+	loop
+	
+	redraw
+	await 50
+	
+	goto *mainLoop
+
+*cmd
+	if lparam == obj {
+		if (wparam >> 16 & $ffff) == 1/*CBN_SELCHANGE*/ {
+			sendmsg obj, $147/*CB_GETCURSEL*/
+			mode = stat
+			gosub *change
+		}
+	}
+	return
+	
+*change
+	initPad mode & 2
+	enableAnalog 0, (mode & 1) - 1
+	num = stat
+	return

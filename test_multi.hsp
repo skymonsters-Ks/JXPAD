@@ -1,0 +1,49 @@
+#include "jxpad.as" /* マルチパッドのテスト */
+
+	initPad
+	num = stat
+	
+	repeat num
+		a = cnt
+		setMultiPad cnt, 1, a
+	loop
+	
+	dim px, num
+	dim py, num
+	repeat num
+		px(cnt) = 100 + rnd(440)
+		py(cnt) = 50 + rnd(380)
+	loop
+	
+*mainLoop
+
+	repeat num
+		updatePad cnt
+		if padPress(PAD_LEFT, cnt)  : px(cnt) -= 2
+		if padPress(PAD_UP, cnt)    : py(cnt) -= 2
+		if padPress(PAD_RIGHT, cnt) : px(cnt) += 2
+		if padPress(PAD_DOWN, cnt)  : py(cnt) += 2
+	loop
+	
+	redraw 0
+	color : boxf : color 255, 255, 255
+	
+	repeat num
+		x = px(cnt)
+		y = py(cnt)
+		r = 10
+		hsvcolor cnt * 50, 120, 240
+		circle x - r, y - r, x + r, y + r
+		if cnt == 0 {
+			pos x - 50, y - 30
+			mes "1P(Keyboard)"
+		} else {
+			pos x - 30, y - 30
+			mes strf("%dP(Pad%d)", cnt + 1, cnt)
+		}
+	loop
+	
+	redraw 1
+	await 15
+		
+	goto *mainLoop

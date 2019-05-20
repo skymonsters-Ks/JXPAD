@@ -1,0 +1,146 @@
+#include "jxpad.as" /* ボタン・軸の割当テスト */
+
+	initPad
+	num = stat
+	enableAnalog
+	
+	bname = "Left","Up","Right","Down"
+	repeat 12, 1
+		bname(cnt + 3) = "Button_" + cnt
+	loop
+	bname(16) = "LStick_X", "LStick_Y", "RStick_X", "RStick_Y"
+	dvstr = "Keyboard"
+	repeat num - 1, 1
+		dvstr(cnt) = "Pad" + cnt
+	loop
+	kbstr = "キー", "ボタン"
+	stkstr = "L", "R"
+	stktlt = "右", "下"
+	sign = "+", "-"
+	
+	assigning = 0
+	presscnt = 0
+	assigndev = -1
+	
+*mainLoop
+
+	if assigning {
+		inbutton = getInputButton(assigndev)
+		if inbutton != 0 && prebutton == 0 {
+			if assignlv >= 16 {
+				if inbutton == getButtonMap(assigndev, 4) {
+					getAxisAll axis, assigndev
+					repeat 6
+						if absf(axis(cnt)) > 0.9 {
+							assignAxis assigndev, assignlv - 16, cnt, axis(cnt) < 0
+							assignlv++
+							break
+						}
+					loop
+				}
+			} else {
+				assignButton assigndev, assignlv, inbutton
+				assignlv++
+			}
+			if (assigndev == 0 && assignlv == 16) || (assignlv == 20) {
+				assigning = 0
+				assignlv = 0
+			}
+		}
+		prebutton = inbutton
+	} else {
+		updatePad
+		status = stat
+		if padPress(PAD_BUTTON_1) {
+			presscnt++
+			if presscnt > 100 {
+				repeat num
+					inbutton = getInputButton(cnt)
+					if inbutton == getButtonMap(cnt, PAD_BUTTON_1) {
+						assigndev = cnt
+						presscnt = 0
+						assigning = 1
+						status = 0
+						prebutton = inbutton
+						if cnt {
+							assignlv = 4
+						} else {
+							assignlv = 0
+						}
+						break
+					}
+				loop
+			}
+		} else {
+			presscnt = 0
+		}
+	}
+
+	redraw 0
+	color : boxf : color 255, 255, 255
+	
+	pos 10, 10
+	if assigning {
+		if assignlv < 16 {
+			mes dvstr(assigndev) + " - " + bname(assignlv) + " に割り当てる" + kbstr(assigndev > 0) + "を押してください"
+		} else {
+			mes dvstr(assigndev) + " - " + stkstr((assignlv - 16) / 2) + "-Stick を " + stktlt((assignlv - 16) \ 2) + " に倒し Button_1 を押してください"
+		}
+	} else {
+		mes "Button_1 を長押しするとそのパッド・キーボードのボタン割り当てを開始します " + presscnt
+	}
+	pos 10, 60
+	repeat 16
+		if status >> cnt & 1 {
+			color 255, 80, 255
+		} else {
+			color 255, 255, 255
+		}
+		mes bname(cnt)
+	loop
+	color 255, 255, 255
+	repeat 4, 16
+		mes bname(cnt)
+	loop
+	repeat num : d = cnt
+		xd = cnt * 70 + (cnt > 0) * 10
+		pos 100 + xd + (cnt > 0) * 15, 40
+		mes dvstr(d)
+		pos 120 + xd, 60
+		repeat 16
+			if d > 0 && cnt < 4 {
+				mes "--"
+			} else {
+				mes strf("0x%x", getButtonMap(d, cnt))
+			}
+		loop
+		repeat 4
+			if d {
+				mes sign(getAxisRev(d, cnt)) + getAxisNo(d, cnt)
+			} else {
+				mes "--"
+			}
+		loop
+	loop
+	color 255, 255, 255
+	stickbox 30, 450, 20, 5, padAnalog(PAD_LSTICK_X), padAnalog(PAD_LSTICK_Y)
+	stickbox 80, 450, 20, 5, padAnalog(PAD_RSTICK_X), padAnalog(PAD_RSTICK_Y)
+
+	redraw 1
+	await 15
+
+	goto *mainLoop
+
+#deffunc stickbox int _x, int _y, int _sz, int _cs, double _stx, double _sty
+	box _x, _y, _sz, _sz
+	x = _x + _stx * _sz
+	y = _y + _sty * _sz
+	circle x - _cs, y - _cs, x + _cs, y + _cs
+	return
+
+#deffunc box int _x, int _y, int _sx, int _sy
+	line _x + _sx, _y - _sy, _x - _sx, _y - _sy
+	line _x + _sx, _y + _sy
+	line _x - _sx, _y + _sy
+	line _x - _sx, _y - _sy
+	return
