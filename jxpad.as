@@ -346,7 +346,6 @@
 
 #deffunc assignButton int _id, int _k, int _c
 
-	r = -1
 	switch inputType(_id)
 	case TYPE_KEYBOARD
 		c = _c & $ff
@@ -361,7 +360,10 @@
 		s = 4
 		swbreak
 	swend
-	if (_k < s || _k >= DIG_KEY_NUM) : return r
+	if (_k < s || _k >= DIG_KEY_NUM) {
+		return -2
+	}
+	r = -1
 	repeat DIG_KEY_NUM - s, s
 		if (cnt == _k) : continue
 		if (c == keymap(cnt, _id)) {
@@ -383,9 +385,13 @@
 
 #deffunc assignAxis int _id, int _ax, int _axn, int _rev
 
+	if ((inputType(_id) == TYPE_KEYBOARD) || (_axn < 0 || _axn >= DEV_AXIS_MAX)) {
+		return -2
+	}
+	if (axisRange(_axn, _id) == 0) {
+		return -3
+	}
 	r = -1
-	if (inputType(_id) == TYPE_KEYBOARD) : return r
-	if (_axn < 0 || _axn >= DEV_AXIS_MAX) : return r
 	repeat AXIS_NUM
 		if (cnt == _ax) : continue
 		if (_axn == axisNo(cnt, _id)) {

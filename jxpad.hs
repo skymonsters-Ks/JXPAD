@@ -186,6 +186,8 @@ code ‚ÍŠî–{“I‚É getInputButton ‚Å“¾‚ç‚ê‚éƒ{ƒ^ƒ“‚Ì’l‚ðŽw’è‚·‚é‚æ‚¤‚É‚µ‚Ä‚­‚¾‚³‚¢
 
 ƒ{ƒ^ƒ“‚ÉŠ„‚è“–‚Ä‚½ƒR[ƒh‚ª‘¼‚Ìƒ{ƒ^ƒ“‚Æd•¡‚µ‚Ä‚¢‚½ê‡‚Í’u‚«Š·‚¦‚ç‚ê‚Ü‚·B‚»‚ÌÛd•¡æ‚Ìƒ{ƒ^ƒ“ID‚ª stat ‚É”’l‚Å•Ô‚è‚Ü‚·Bd•¡‚µ‚Ä‚¢‚È‚¢ê‡‚Í -1 ‚ª•Ô‚è‚Ü‚·B
 
+•s³‚Èƒ{ƒ^ƒ“ID‚ðŽw’è‚µ‚½ê‡‚Í stat ‚É -2 ‚ª•Ô‚è‚Ü‚·B
+
 %href
 getButtonMap
 
@@ -237,6 +239,8 @@ rev : ”½“]ƒtƒ‰ƒO (0)
 pid ‚ÅŽw’è‚µ‚½ƒpƒbƒh‚ÌŽ²ID ax ‚ÉAŽ²No. axn ‚ðŠ„‚è“–‚Ä‚Ü‚·Brev ‚É 1 ‚ðŽw’è‚·‚é‚ÆŽ²‚Ì³•‰‚ª”½“]‚µ‚Ü‚·B
 
 Š„‚è“–‚Ä‚½Ž²‚ª‘¼‚ÌŽ²‚Æd•¡‚µ‚Ä‚¢‚½ê‡‚Í’u‚«Š·‚¦‚ç‚ê‚Ü‚·B‚»‚ÌÛd•¡æ‚ÌŽ²ID‚ª stat ‚É”’l‚Å•Ô‚è‚Ü‚·Bd•¡‚µ‚Ä‚¢‚È‚¢ê‡‚Í -1 ‚ª•Ô‚è‚Ü‚·B
+
+•s³‚Èƒpƒ‰ƒ[ƒ^‚ðŽw’è‚µ‚½ê‡‚Í stat ‚É -2 ‚ªAŽg—p‚³‚ê‚Ä‚¢‚È‚¢Ž²No.‚ðŽw’è‚µ‚½ê‡‚Í -3 ‚ª•Ô‚è‚Ü‚·B
 
 %href
 getAxisNo
