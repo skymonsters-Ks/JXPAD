@@ -152,23 +152,48 @@
 		setAxisBorder id, 0.5
 		if (_flag) {
 			axisNum(id) = XINPUT_AXIS_NUM
-			repeat axisNum(id)
+			repeat XINPUT_AXIS_NUM
 				axisCenter(cnt, id) = 0
 				axisRange(cnt, id) = $ffff
+				assignAxis id, cnt, cnt
 			loop
 			setTrigBorder id, 0.5
 		} else {
 			getJoyCaps inputId(id), jc
 			axisNum(id) = jc(26)
-			repeat axisNum(id)
+			if (axisNum(id) >= 2) { ; 軸数が2以上だと軸1,2は使用されているものとする（軸3~6はJOYCAPS.wCapsで判定できる）
+				axbit = 0b11 + ((jc(24) & $f) << 2)
+			} else { ; 軸数1以下は除外（たとえ1があってもスティックとして使えない）
+				axbit = 0
+			}
+			xflag = (axisNum(id) == 5) & (jc(24) & $7 == $7) ; XInputかも
+			ac = 0
+			repeat DEV_AXIS_MAX
+				if ((axbit & (1 << cnt)) == 0) : continue
 				i = cnt * 2 + 9 + (cnt > 2) * 3
 				axisCenter(cnt, id) = (jc(i + 1) + jc(i)) / 2
 				axisRange(cnt, id) = jc(i + 1) - jc(i)
+				if (ac < 4) {
+					if (xflag) {
+						switch cnt
+						case 0
+						case 1
+							assignAxis id, ac, cnt
+							swbreak
+						case 2
+							continue
+						case 3
+						case 4
+							assignAxis id, 3 - (cnt - 3), cnt
+							swbreak
+						swend
+					} else {
+						assignAxis id, ac, cnt
+					}
+					ac++
+				}
 			loop
 		}
-		repeat AXIS_NUM
-			assignAxis id, cnt, cnt
-		loop
 	loop
 
 	dim digstat, STAT_NUM, 2
@@ -283,16 +308,19 @@
 		XInputGetState inputId(_id), xstat
 		repeat XINPUT_AXIS_NUM
 			_axa(cnt) = 2.0 * (wpeek(xstat, 8 + cnt * 2) << 16 >> 16) * (1 - cnt \ 2 * 2) / axisRange(cnt, _id)
-			r++
 		loop
+		r = XINPUT_AXIS_NUM
 		swbreak
 	case TYPE_JOY
 		joyGetPosEx inputId(_id), jstat
 		foreach _axa
-			if (axisRange(cnt, _id) == 0) : break
-			_axa(cnt) = 2.0 * (lpeek(jstat, 8 + cnt * 4) - axisCenter(cnt, _id)) / axisRange(cnt, _id)
-			r++
+			if (axisRange(cnt, _id) == 0) {
+				_axa(cnt) = 0.0
+			} else {
+				_axa(cnt) = 2.0 * (lpeek(jstat, 8 + cnt * 4) - axisCenter(cnt, _id)) / axisRange(cnt, _id)
+			}
 		loop
+		r = DEV_AXIS_MAX
 		swbreak
 	swend
 	return r
@@ -357,7 +385,7 @@
 
 	r = -1
 	if (inputType(_id) == TYPE_KEYBOARD) : return r
-	if (_axn < 0 || _axn >= axisNum(_id)) : return r
+	if (_axn < 0 || _axn >= DEV_AXIS_MAX) : return r
 	repeat AXIS_NUM
 		if (cnt == _ax) : continue
 		if (_axn == axisNo(cnt, _id)) {
